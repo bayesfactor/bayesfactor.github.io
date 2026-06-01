@@ -116,11 +116,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="kicker">AI · Robotics · The Future of Work — May 2026</div>
+    <div class="kicker">AI, Robotics, and the Future of Work — May 2026</div>
     <h1>Is This Time <em>Different?</em></h1>
-    <p class="dek">Where serious thinkers and forecasting aggregates land on two questions that are usually conflated. <b>Horizontal:</b> does AI/robotics break the historical "displace &rarr; reabsorb" pattern? <b>Vertical:</b> is the outcome bad for typical workers? They come apart — you can be <i>not different but bad</i> (inequality) or <i>different but good</i> (post-scarcity).</p>
+    <p class="dek">Will AI and Robotics be yet another technology wave like past waves of automation where people shift jobs but the economic unemployment remains low, or is this time different? What do serious thinkers and forecasting aggregates say on this topic? <b>Horizontal:</b> will AI/robotics break the historical "displace &rarr; reabsorb" job pattern across the economy? <b>Vertical:</b> will the outcome be bad for typical workers?</p>
   </header>
-  <p class="hint">Hover a point for its reasoning and source &mdash; or tap on touchscreens. Click a point to open its source.</p>
+  <p class="hint">Hover a point for its reasoning and source &mdash; or tap on touchscreens. Click a point to open details.</p>
 
   <div class="figure" id="figure">
     <svg id="plot" viewBox="0 0 1000 808" role="img" aria-label="2x2 scatter of thinkers on whether AI is different and whether it is bad for workers">
@@ -141,11 +141,11 @@
 
   <div class="notes">
     <p><b>How to read the numbers.</b> Each value is a probability, so "20" means 20:80. <b>Different?</b> = P(AI/robotics produces a structural break or persistent technological unemployment within ~10&ndash;15 yr). <b>Bad for workers?</b> = P(net-negative outcome for typical workers: mass displacement and/or sharply falling labor share with no adequate offset).</p>
-    <p><b>These are interpretive calibrations</b> of each thinker's stated position, not probabilities they have personally quoted — treat &plusmn;10&ndash;15 points as noise. The exceptions are the <i>aggregate</i> rows, which report real elicited figures. Two of those (<b>AI Impacts ESPAI</b>, <b>Metaculus/Manifold</b>) speak only to the capability/timeline axis, so they appear in a separate rail beneath the plot — same horizontal scale, but deliberately outside the worker-outcome axis, since they make no claim there.</p>
+    <p><b>These are interpretive calibrations</b> of each thinker's stated position, not probabilities they have personally quoted — imagine error bars of &plusmn;15. The exceptions are the <i>aggregate</i> rows, which report real elicited figures. Two of those (<b>AI Impacts ESPAI</b>, <b>Metaculus/Manifold</b>) speak only to the capability/timeline axis, so they appear in a separate rail beneath the plot — same horizontal scale, but deliberately outside the worker-outcome axis, since they make no claim there.</p>
     <p><b>Not plotted — FRI Existential Risk Persuasion Tournament (2022):</b> focused on catastrophic risk rather than labor, but its reusable finding is that superforecasters were systematically <i>less</i> alarmed than domain experts, even after adversarial collaboration. <a class="inl" href="https://forecastingresearch.org/xpt" target="_blank" rel="noopener">source &#8599;</a></p>
     <div class="foot">
-      <span>Positions are interpretive and move quickly; verify before citing.</span>
-      <span>Source links point to canonical pages — edit freely in the file.</span>
+      <span>Positions are interpretations not quotations and may be updated; verify before citing.</span>
+      <span>Source links point to canonical pages.</span>
     </div>
   </div>
 </div>
@@ -351,9 +351,9 @@ txt(P.r, P.b+40, "axis-end","end","structural break \u2192");
 const yt=el("text",{x:0,y:0,"class":"axis-title","text-anchor":"middle",transform:`translate(${P.l-52},${(P.t+P.b)/2}) rotate(-90)`});
 yt.textContent="Worse for workers  \u2192"; grid.appendChild(yt);
 const ye1=el("text",{x:0,y:0,"class":"axis-end","text-anchor":"start",transform:`translate(${P.l-36},${P.b}) rotate(-90)`});
-ye1.textContent="benign \u2192"; grid.appendChild(ye1);
+ye1.textContent="\u2190 benign"; grid.appendChild(ye1);
 const ye2=el("text",{x:0,y:0,"class":"axis-end","text-anchor":"end",transform:`translate(${P.l-36},${P.t}) rotate(-90)`});
-ye2.textContent="\u2190 harmful"; grid.appendChild(ye2);
+ye2.textContent="harmful \u2192"; grid.appendChild(ye2);
 
 // quadrant captions
 const caps=document.getElementById("captions");
@@ -361,9 +361,9 @@ function caption(x,y,anchor,title,sub){
   const t=el("text",{x,y,"class":"qname","text-anchor":anchor});t.textContent=title;caps.appendChild(t);
   const s=el("text",{x,y:y+15,"class":"qsub","text-anchor":anchor});s.textContent=sub;caps.appendChild(s);
 }
-caption(P.l+14, P.b-14,"start","Continuity","familiar churn, benign");
+caption(P.l+14, P.b-20,"start","Continuity","familiar churn, benign");
 caption(P.l+14, P.t+20,"start","Old pattern, new losers","no break \u2014 but workers lose");
-caption(P.r-14, P.b-14,"end","Transformation","rupture with an upside");
+caption(P.r-14, P.b-20,"end","Transformation","rupture with an upside");
 caption(P.r-14, P.t+20,"end","Genuine rupture","a break with a downside");
 
 // ---- capability-timeline rail (sits OUTSIDE the worker-outcome plane) ----
