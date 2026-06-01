@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Is This Time Different? — AI, Robotics &amp; the Future of Work</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4efe6;
+    --paper-2:#efe8dc;
+    --ink:#211c15;
+    --ink-soft:#5d564a;
+    --line:#cdc3b2;
+    --rule:#1f1b14;
+    /* camp hues */
+    --skeptic:#2f6b5e;
+    --optimist:#c08a2d;
+    --middle:#3f6699;
+    --transform:#b1532f;
+    --aggregate:#6b645a;
+    /* quadrant tints */
+    --q-continuity:rgba(47,107,94,0.07);
+    --q-transform:rgba(63,102,153,0.07);
+    --q-losers:rgba(192,138,45,0.09);
+    --q-rupture:rgba(177,83,47,0.09);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(rgba(31,27,20,0.022) 1px,transparent 1px);
+    background-size:4px 4px;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:38px 22px 60px}
+  header{border-bottom:2px solid var(--rule);padding-bottom:18px;margin-bottom:8px}
+  .kicker{
+    font-size:11px;letter-spacing:0.28em;text-transform:uppercase;
+    color:var(--ink-soft);font-weight:600;margin-bottom:10px;
+  }
+  h1{
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:900;font-size:clamp(30px,5.4vw,52px);
+    line-height:0.98;letter-spacing:-0.01em;margin:0 0 12px;
+  }
+  h1 em{font-style:italic;font-weight:500}
+  .dek{
+    font-size:15px;color:var(--ink-soft);max-width:60ch;margin:0;
+    font-weight:400;
+  }
+  .dek b{color:var(--ink);font-weight:600}
+  .figure{position:relative;margin:26px 0 10px}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  text{font-family:"IBM Plex Sans",sans-serif}
+  .qname{font-family:"Fraunces",Georgia,serif;font-weight:600;letter-spacing:0.04em;
+    text-transform:uppercase;fill:var(--ink);opacity:0.5;font-size:13px}
+  .qsub{fill:var(--ink-soft);font-size:10.5px;opacity:0.75}
+  .axis-title{font-family:"Fraunces",Georgia,serif;font-weight:600;fill:var(--ink);font-size:14px}
+  .axis-end{fill:var(--ink-soft);font-size:10.5px;font-weight:500;letter-spacing:0.02em}
+  .tick{fill:var(--ink-soft);font-size:9.5px}
+  .ptlabel{font-size:10.5px;font-weight:500;fill:var(--ink);pointer-events:none;
+    paint-order:stroke;stroke:var(--paper);stroke-width:3px;stroke-linejoin:round}
+  .ptlabel.agg{font-style:italic;fill:#48433a}
+  .dot{cursor:pointer;transition:transform .12s ease}
+  .dot circle,.dot path{transition:filter .12s ease,opacity .12s ease}
+  .axis-tickmark{cursor:pointer}
+  /* legend */
+  .legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;
+    margin:14px 0 4px;font-size:12px;color:var(--ink-soft)}
+  .legitem{display:inline-flex;align-items:center;gap:7px;cursor:default;
+    user-select:none;padding:2px 4px;border-radius:4px;transition:background .12s}
+  .legitem .sw{width:13px;height:13px;border-radius:50%;display:inline-block}
+  .legitem .sw.dia{border-radius:2px;transform:rotate(45deg);width:11px;height:11px}
+  .legitem.dim{opacity:0.32}
+  .legdivider{width:1px;height:16px;background:var(--line)}
+  /* tooltip */
+  .tip{
+    position:absolute;z-index:30;pointer-events:none;opacity:0;
+    transform:translateY(4px);transition:opacity .12s ease,transform .12s ease;
+    max-width:300px;background:#fffdf8;border:1.5px solid var(--rule);
+    box-shadow:6px 7px 0 rgba(31,27,20,0.13);padding:13px 14px 12px;border-radius:3px;
+  }
+  .tip.on{opacity:1;transform:translateY(0)}
+  .tip.clickable{pointer-events:auto}
+  .tip .name{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:17px;
+    line-height:1.05;margin-bottom:2px}
+  .tip .camp{font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;
+    font-weight:600;margin-bottom:9px}
+  .tip .metrics{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;margin:0 0 9px;padding:7px 0;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .tip .metrics b{color:var(--ink);font-weight:600}
+  .tip .metrics .tl{font-style:italic}
+  .tip .basis{font-size:12px;line-height:1.45;color:#332e25;margin:0 0 10px}
+  .tip .src{font-size:11px;font-weight:600;color:var(--middle);text-decoration:none;
+    display:inline-flex;align-items:center;gap:4px}
+  .tip .src:hover{text-decoration:underline}
+  .tip .naxis{font-size:10px;color:var(--ink-soft);font-style:italic;margin-top:-3px;margin-bottom:9px}
+  .notes{border-top:1px solid var(--line);margin-top:22px;padding-top:16px;
+    font-size:12.5px;color:var(--ink-soft);line-height:1.5}
+  .notes p{margin:0 0 9px;max-width:78ch}
+  .notes b{color:var(--ink)}
+  .notes .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+    margin-top:6px;font-size:11px;opacity:0.8}
+  .hint{font-size:11.5px;color:var(--ink-soft);font-style:italic;margin:2px 0 0}
+  a.inl{color:var(--middle);text-decoration:none;border-bottom:1px solid rgba(63,102,153,.35)}
+  a.inl:hover{border-bottom-color:var(--middle)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">AI · Robotics · The Future of Work — May 2026</div>
+    <h1>Is This Time <em>Different?</em></h1>
+    <p class="dek">Where serious thinkers and forecasting aggregates land on two questions that are usually conflated. <b>Horizontal:</b> does AI/robotics break the historical "displace &rarr; reabsorb" pattern? <b>Vertical:</b> is the outcome bad for typical workers? They come apart — you can be <i>not different but bad</i> (inequality) or <i>different but good</i> (post-scarcity).</p>
+  </header>
+  <p class="hint">Hover a point for its reasoning and source &mdash; or tap on touchscreens. Click a point to open its source.</p>
+
+  <div class="figure" id="figure">
+    <svg id="plot" viewBox="0 0 1000 808" role="img" aria-label="2x2 scatter of thinkers on whether AI is different and whether it is bad for workers">
+      <!-- quadrant tints (filled by JS-independent static rects) -->
+      <g id="quads"></g>
+      <!-- gridlines + axes -->
+      <g id="grid"></g>
+      <!-- quadrant captions -->
+      <g id="captions"></g>
+      <!-- axis-only markers + points injected here -->
+      <g id="marks"></g>
+      <g id="points"></g>
+    </svg>
+    <div class="tip" id="tip"></div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="notes">
+    <p><b>How to read the numbers.</b> Each value is a probability, so "20" means 20:80. <b>Different?</b> = P(AI/robotics produces a structural break or persistent technological unemployment within ~10&ndash;15 yr). <b>Bad for workers?</b> = P(net-negative outcome for typical workers: mass displacement and/or sharply falling labor share with no adequate offset).</p>
+    <p><b>These are interpretive calibrations</b> of each thinker's stated position, not probabilities they have personally quoted — treat &plusmn;10&ndash;15 points as noise. The exceptions are the <i>aggregate</i> rows, which report real elicited figures. Two of those (<b>AI Impacts ESPAI</b>, <b>Metaculus/Manifold</b>) speak only to the capability/timeline axis, so they appear in a separate rail beneath the plot — same horizontal scale, but deliberately outside the worker-outcome axis, since they make no claim there.</p>
+    <p><b>Not plotted — FRI Existential Risk Persuasion Tournament (2022):</b> focused on catastrophic risk rather than labor, but its reusable finding is that superforecasters were systematically <i>less</i> alarmed than domain experts, even after adversarial collaboration. <a class="inl" href="https://forecastingresearch.org/xpt" target="_blank" rel="noopener">source &#8599;</a></p>
+    <div class="foot">
+      <span>Positions are interpretive and move quickly; verify before citing.</span>
+      <span>Source links point to canonical pages — edit freely in the file.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = [
+  // type: thinker | aggregate (both axes) ; xaxis (timeline-only, on x-axis)
+  {name:"Bryan Caplan", camp:"Skeptic", x:10, y:15, type:"thinker", dx:0, dy:-16,
+   basis:"Comparative advantage and persistent labor demand; the clearest \u201Cnot different, will be fine\u201D position.",
+   url:"http://www.bcaplan.com/"},
+  {name:"Daron Acemoglu", camp:"Skeptic", x:20, y:55, type:"thinker", dx:12, dy:-12,
+   basis:"Task-based model implies \u2264~0.66% TFP gain over 10 yr \u2014 modest growth, but warns AI need not reduce labor-income inequality.",
+   url:"https://www.nber.org/papers/w32487"},
+  {name:"Andrew Ng", camp:"Optimist", x:20, y:25, type:"thinker", dx:0, dy:18,
+   basis:"\u201CAI is the new electricity\u201D; stresses augmentation and broad opportunity, skeptical of doom narratives.",
+   url:"https://www.deeplearning.ai/"},
+  {name:"David Autor", camp:"Middle", x:25, y:35, type:"thinker", dx:-12, dy:14,
+   basis:"Polarization / task framework; AI could rebuild middle-skill work if institutions steer it that way.",
+   url:"https://economics.mit.edu/people/faculty/david-autor"},
+  {name:"Tyler Cowen", camp:"Middle", x:30, y:33, type:"thinker", dx:14, dy:-10,
+   basis:"\u201CAverage Is Over\u201D: complementarity and polarization; adjustment is manageable, fast-takeoff economics doubted.",
+   url:"https://marginalrevolution.com/"},
+  {name:"Cass Sunstein", camp:"Middle", x:33, y:40, type:"thinker", dx:-13, dy:-12,
+   basis:"Outcome hinges on adaptable regulation and behavioral / institutional design rather than the tech itself.",
+   url:"https://en.wikipedia.org/wiki/Cass_Sunstein"},
+  {name:"Carl B. Frey", camp:"Transition-risk", x:30, y:55, type:"thinker", dx:13, dy:-10,
+   basis:"Long-run adjusts, but the transition is brutal and politically destabilizing (\u201CThe Technology Trap\u201D).",
+   url:"https://www.carlbenediktfrey.com/"},
+  {name:"Erik Brynjolfsson", camp:"Middle", x:35, y:40, type:"thinker", dx:14, dy:6,
+   basis:"\u201CTuring Trap\u201D: harm flows from choosing automation over augmentation; record wealth is possible either way.",
+   url:"https://arxiv.org/abs/2201.04200"},
+  {name:"Kai-Fu Lee", camp:"Middle", x:50, y:50, type:"thinker", dx:13, dy:-10,
+   basis:"~40% of jobs exposed, offset by new roles, human-touch work, and UBI advocacy.",
+   url:"https://en.wikipedia.org/wiki/AI_Superpowers"},
+  {name:"Scott Alexander", camp:"Transformative", x:55, y:45, type:"thinker", dx:14, dy:12,
+   basis:"Takes the generality argument seriously; AGI plausible, but heavily uncertainty-forward.",
+   url:"https://www.astralcodexten.com/"},
+  {name:"Anton Korinek", camp:"Transformative", x:55, y:55, type:"thinker", dx:-13, dy:-12,
+   basis:"Models AGI-transition scenarios including wage collapse; transformative conditional on AGI arriving.",
+   url:"https://www.nber.org/papers/w32255"},
+  {name:"Martin Ford", camp:"Transformative", x:60, y:65, type:"thinker", dx:-12, dy:14,
+   basis:"\u201CRise of the Robots\u201D: broad automation with weak reabsorption of displaced labor.",
+   url:"https://en.wikipedia.org/wiki/Rise_of_the_Robots_(book)"},
+  {name:"Robin Hanson", camp:"Transformative", x:65, y:40, type:"thinker", dx:13, dy:6,
+   basis:"\u201CAge of Em\u201D: a radically different world where growth explodes and humans live off capital \u2014 different \u2260 bad.",
+   url:"https://ageofem.com/"},
+  {name:"Yuval N. Harari", camp:"Transformative", x:65, y:70, type:"thinker", dx:-12, dy:-10,
+   basis:"\u201CUseless class\u201D: the high-different / high-bad corner (flagged as the most pundit-leaning entry).",
+   url:"https://www.ynharari.com/"},
+  {name:"Davidson / Open Phil", camp:"Transformative", x:65, y:50, type:"thinker", dx:-14, dy:16,
+   basis:"Explosive-growth models; outcome is bimodal \u2014 utopia or catastrophe rather than a middling path.",
+   url:"https://www.openphilanthropy.org/research/could-advanced-ai-drive-explosive-economic-growth/"},
+  {name:"Nick Bostrom", camp:"Transformative", x:75, y:30, type:"thinker", dx:-10, dy:18,
+   basis:"\u201CDeep Utopia\u201D: genuinely different and potentially good if aligned; his real worry is x-risk, not labor.",
+   url:"https://nickbostrom.com/"},
+  // AI scientists & lab leaders
+  {name:"Yann LeCun", camp:"Skeptic", x:25, y:22, type:"thinker", dx:13, dy:-10,
+   basis:"Calls the 20% job-loss claim \u201Cridiculously stupid\u201D; argues today\u2019s LLMs can\u2019t reach human-level and the displace\u2192reabsorb pattern will hold. Defers to labor economists over AI builders.",
+   url:"https://yann.lecun.com/"},
+  {name:"Geoffrey Hinton", camp:"Transformative", x:72, y:75, type:"thinker", dx:9, dy:-12,
+   basis:"Likens AI to the industrial revolution but for intelligence; expects it to replace \u201Cmany, many jobs\u201D and make most people poorer as firms automate to cut costs.",
+   url:"https://www.cs.toronto.edu/~hinton/"},
+  {name:"Yoshua Bengio", camp:"Transformative", x:62, y:58, type:"thinker", dx:-12, dy:-12,
+   basis:"Safety-first; signed the pause letter. Concerned about loss of control and disruption, though his emphasis is catastrophic risk more than labor specifically.",
+   url:"https://yoshuabengio.org/"},
+  {name:"Sam Altman", camp:"Transformative", x:72, y:42, type:"thinker", dx:12, dy:-10,
+   basis:"Whole classes of jobs vanish, offset by enormous wealth and redistribution (UBI-type schemes); transformative and ultimately positive if the gains are shared.",
+   url:"https://blog.samaltman.com/"},
+  {name:"Dario Amodei", camp:"Transformative", x:78, y:62, type:"thinker", dx:11, dy:13,
+   basis:"Warns AI could wipe out ~half of entry-level white-collar jobs and push unemployment to 10\u201320% within 1\u20135 yr \u2014 the most aggressive near-term displacement call here.",
+   url:"https://www.darioamodei.com/essay/machines-of-loving-grace"},
+  {name:"Demis Hassabis", camp:"Transformative", x:66, y:36, type:"thinker", dx:-12, dy:16,
+   basis:"AGI-driven \u201Cradical abundance\u201D \u2014 cures, energy, materials; transformative but comparatively optimistic on net outcomes, with active transition management needed.",
+   url:"https://deepmind.google/"},
+  // aggregates (both axes)
+  {name:"FRI Economic Survey (2026)", camp:"Aggregate", x:25, y:50, type:"aggregate", dx:14, dy:18,
+   basis:"Economists, AI experts & superforecasters. Even the rapid scenario \u2192 LFPR ~55%, ~10M fewer jobs, inequality ~80% \u2014 large but historically precedented; no 30% growth.",
+   url:"https://forecastingresearch.org/research/economic-effects-of-ai"},
+  // timeline-only aggregates (shown in the rail below the plot)
+  {name:"AI Impacts ESPAI (2023)", camp:"Aggregate", x:30, type:"xaxis",
+   basis:"n=2,778 ML researchers. 50% chance of high-level machine intelligence by 2047, but full automation of labor by 2116 \u2014 the ~69-yr gap is the key counterpoint to the generality argument.",
+   url:"https://wiki.aiimpacts.org/ai_timelines/predictions_of_human-level_ai_timelines/ai_timeline_surveys/2023_expert_survey_on_progress_in_ai"},
+  {name:"Metaculus / Manifold", camp:"Aggregate", x:50, type:"xaxis",
+   basis:"Market aggregates put ~50% AGI by 2030; measures capability arrival, not the labor-market outcome.",
+   url:"https://www.metaculus.com/"}
+];
+
+const CAMP = {
+  "Skeptic":        getCss("--skeptic"),
+  "Optimist":       getCss("--optimist"),
+  "Middle":         getCss("--middle"),
+  "Transition-risk":getCss("--transform"),
+  "Transformative": getCss("--transform"),
+  "Aggregate":      getCss("--aggregate")
+};
+
+// color is now keyed by PROFESSION (lookup by name keeps the DATA array clean)
+const PROFESSION = {
+  "Bryan Caplan":"Economist","Daron Acemoglu":"Economist","David Autor":"Economist",
+  "Tyler Cowen":"Economist","Carl B. Frey":"Economist","Erik Brynjolfsson":"Economist",
+  "Anton Korinek":"Economist","Robin Hanson":"Economist",
+  "Andrew Ng":"Computer scientist","Yann LeCun":"Computer scientist",
+  "Geoffrey Hinton":"Computer scientist","Yoshua Bengio":"Computer scientist",
+  "Sam Altman":"Entrepreneur","Dario Amodei":"Entrepreneur","Demis Hassabis":"Entrepreneur",
+  "Kai-Fu Lee":"Entrepreneur",
+  "Nick Bostrom":"Philosopher","Cass Sunstein":"Legal scholar","Yuval N. Harari":"Historian",
+  "Scott Alexander":"Writer / forecaster","Martin Ford":"Writer / forecaster",
+  "Davidson / Open Phil":"Writer / forecaster"
+};
+const PROF_COLOR = {
+  "Economist":"#2f6b5e",
+  "Computer scientist":"#2f5fa0",
+  "Entrepreneur":"#b1532f",
+  "Philosopher":"#6d4a7a",
+  "Historian":"#ad8217",
+  "Legal scholar":"#8c3b4a",
+  "Writer / forecaster":"#b06a86",
+  "Aggregate":getCss("--aggregate")
+};
+const profOf  = d => PROFESSION[d.name] || "Aggregate";
+const colorOf = d => PROF_COLOR[profOf(d)];
+
+// expanded background + view, shown in the tooltip (falls back to d.basis)
+const DETAIL = {
+"Bryan Caplan":"Economics professor at George Mason and a combative libertarian. Argues comparative advantage all but guarantees humans keep employable niches, and that two centuries of automation panics have always proved wrong \u2014 so he expects continuity, not rupture.",
+"Daron Acemoglu":"MIT Institute Professor and 2024 economics Nobel laureate; his task-based models with Restrepo formalize how automation reshapes labor. He pegs AI\u2019s 10-year productivity boost near 0.5% and warns that, absent new tasks for workers, it can widen inequality even while raising output.",
+"David Autor":"MIT labor economist behind the job-polarization and \u2018task\u2019 literatures and the \u2018China shock\u2019 studies. Cautiously hopeful: AI might erode the scarcity value of elite expertise and help rebuild middle-skill, middle-wage work \u2014 but the outcome depends on how it is deployed.",
+"Tyler Cowen":"GMU economist, Marginal Revolution blogger, author of \u2018Average Is Over.\u2019 Expects complementarity to reward those who pair well with machines, widening dispersion. Broadly optimistic on growth while skeptical of fast-takeoff or explosive-growth models.",
+"Carl B. Frey":"Oxford economic historian; co-authored the 2013 \u2018~47% of jobs at risk\u2019 estimate and wrote \u2018The Technology Trap.\u2019 His read of history: technology is eventually absorbed, but transitions can last generations and breed political backlash. The danger is the adjustment, not the end-state.",
+"Erik Brynjolfsson":"Stanford economist directing the Digital Economy Lab; \u2018The Second Machine Age,\u2019 \u2018The Turing Trap.\u2019 Argues the harm is a design choice \u2014 building AI to imitate and replace humans, rather than augment them, concentrates wealth and power even as it could create enormous prosperity.",
+"Anton Korinek":"UVA economist and one of the few formally modeling the macroeconomics of an AGI transition. Takes seriously scenarios where full substitution of human labor pushes wages toward subsistence; how bad it gets hinges on whether and when machines can do essentially everything.",
+"Robin Hanson":"GMU economist (Caltech PhD, ex-AI researcher) and author of \u2018The Age of Em.\u2019 Foresees machine minds triggering explosive growth and a radically alien economy in which biological humans live off capital returns \u2014 transformative and strange, but not necessarily immiserating.",
+"Andrew Ng":"Co-founder of Google Brain, Coursera, and DeepLearning.AI; a leading ML educator. Frames AI as \u2018the new electricity\u2019 \u2014 a general-purpose tool that mostly augments workers \u2014 and pushes back on doom narratives, emphasizing reskilling over mass unemployment.",
+"Yann LeCun":"Turing Award laureate who pioneered convolutional networks; ex-Meta Chief AI Scientist, now building a world-model startup. Holds that today\u2019s LLMs lack a model of the world and can\u2019t reach human-level, so near-term displacement fears are overblown; he calls the 20% unemployment claim absurd and defers to labor economists.",
+"Geoffrey Hinton":"\u2018Godfather of deep learning,\u2019 Turing Award and 2024 physics Nobel laureate; quit Google in 2023 to warn freely. Sees AI as an industrial revolution for cognitive work that will replace many jobs and, because firms automate to cut costs, shift income to capital owners and make most people poorer.",
+"Yoshua Bengio":"Turing Award laureate and founder of Mila in Montreal. His focus is catastrophic and loss-of-control risk; he signed the 2023 \u2018pause\u2019 letter. Concerned about disruption broadly, though labor displacement is not the center of his attention.",
+"Sam Altman":"CEO of OpenAI and former Y Combinator president. Expects whole classes of work to vanish but foresees offsetting abundance and has floated UBI-style redistribution \u2014 transformative, and, with the right policy, ultimately positive.",
+"Dario Amodei":"Co-founder and CEO of Anthropic; former OpenAI research VP with a physics and computational-biology background. Among the most aggressive near-term forecasts: up to half of entry-level white-collar jobs gone and unemployment of 10\u201320% within five years \u2014 coupled with belief in transformative upside.",
+"Demis Hassabis":"Co-founder and CEO of Google DeepMind and 2024 chemistry Nobel laureate (AlphaFold), with a neuroscience PhD. Expects AGI to deliver \u2018radical abundance\u2019 in health, energy, and materials \u2014 transformative but comparatively optimistic, provided the transition is actively managed.",
+"Kai-Fu Lee":"Speech-recognition PhD, former president of Google China, now a leading VC (Sinovation) and author of \u2018AI Superpowers.\u2019 Estimates a large share of tasks are automatable within ~15 years with serious displacement, offset by new roles, \u2018human-touch\u2019 work, and redistribution.",
+"Nick Bostrom":"Philosopher and founding director of Oxford\u2019s Future of Humanity Institute; author of \u2018Superintelligence\u2019 and \u2018Deep Utopia.\u2019 His interest is a post-work, post-scarcity world that could be profoundly good if AI is aligned \u2014 the labor question dissolves; his real worry is existential risk.",
+"Cass Sunstein":"Harvard legal scholar, former head of the White House regulatory office, co-author of \u2018Nudge.\u2019 Sees outcomes as driven by regulation and choice-architecture rather than the technology itself \u2014 well-designed institutions can steer AI toward benign results.",
+"Yuval N. Harari":"Historian at the Hebrew University of Jerusalem; author of \u2018Sapiens\u2019 and \u2018Homo Deus.\u2019 Warns AI could produce a vast economically \u2018useless class\u2019 stripped of relevance \u2014 high on both disruption and harm, and the most popularizing voice in this set.",
+"Scott Alexander":"Psychiatrist and writer behind Astral Codex Ten, a central figure in the rationalist community. Takes the generality argument and short AGI timelines seriously, but is calibrated and uncertainty-forward, synthesizing forecaster and economist evidence rather than asserting one outcome.",
+"Martin Ford":"Software entrepreneur turned futurist; \u2018Rise of the Robots\u2019 won the FT/McKinsey book award in 2015. Argues this wave differs because machines now substitute for cognition broadly, so reabsorption may fail \u2014 and favors UBI as a backstop.",
+"Davidson / Open Phil":"Tom Davidson, a researcher known for Open Philanthropy\u2019s \u2018explosive growth\u2019 report and AI-takeoff modeling. Builds frameworks in which automating AI R&D could push annual growth above 30%; he sees outcomes as bimodal \u2014 utopian or catastrophic, with little middle ground.",
+"FRI Economic Survey (2026)":"A 2026 elicitation by the Chicago Fed, FRI, Yale, Stanford, and Penn of 69 economists, 52 AI specialists, and 38 superforecasters. Even assuming machines beat humans at most tasks by 2030, the median 2050 forecast is large but historically precedented \u2014 ~3.5% GDP growth, ~55% labor-force participation, top-decile wealth ~80% \u2014 with no group endorsing 30% explosive growth.",
+"AI Impacts ESPAI (2023)":"Katja Grace and colleagues\u2019 survey of 2,778 published AI researchers. The aggregate gives a 50% chance of \u2018high-level machine intelligence\u2019 by 2047, but \u2018full automation of labor\u2019 only by 2116 \u2014 a ~69-year gap showing researchers sharply separate raw capability from total economic displacement.",
+"Metaculus / Manifold":"Public forecasting platforms aggregating thousands of predictions, where current AGI estimates cluster around 50% by 2030. They track when capabilities arrive, not what happens to employment \u2014 so this point fixes a horizontal position only."
+};
+function getCss(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+
+// short labels for the plot (full names appear in the tooltip)
+const SHORT={
+  "Scott Alexander":"Scott A.","Davidson / Open Phil":"Davidson","Yuval N. Harari":"Harari",
+  "Carl B. Frey":"Frey","Geoffrey Hinton":"Hinton","Yoshua Bengio":"Bengio",
+  "FRI Economic Survey (2026)":"FRI Econ Survey \u201926",
+  "AI Impacts ESPAI (2023)":"AI Impacts ESPAI \u201923","Metaculus / Manifold":"Metaculus / Manifold"
+};
+const shortName = d => SHORT[d.name] || d.name.split(" ").pop();
+
+// ---- plot geometry ----
+const VB={w:1000,h:770};
+const P={l:92, r:958, t:74, b:648};      // plot rect
+const PW=P.r-P.l, PH=P.b-P.t;
+const X = v => P.l + (v/100)*PW;
+const Y = v => P.b - (v/100)*PH;
+
+const SVG="http://www.w3.org/2000/svg";
+const el=(t,a)=>{const e=document.createElementNS(SVG,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+
+// quadrant tints
+const quads=document.getElementById("quads");
+const mx=X(50), my=Y(50);
+[["--q-continuity",P.l,my,mx-P.l,P.b-my],
+ ["--q-losers",P.l,P.t,mx-P.l,my-P.t],
+ ["--q-transform",mx,my,P.r-mx,P.b-my],
+ ["--q-rupture",mx,P.t,P.r-mx,my-P.t]].forEach(([c,x,y,w,h])=>{
+  quads.appendChild(el("rect",{x,y,width:w,height:h,fill:getCss(c)}));
+});
+
+// grid + axes
+const grid=document.getElementById("grid");
+// frame
+grid.appendChild(el("rect",{x:P.l,y:P.t,width:PW,height:PH,fill:"none",stroke:getCss("--line"),"stroke-width":1}));
+// ticks
+for(let v=0;v<=100;v+=25){
+  grid.appendChild(el("line",{x1:X(v),y1:P.t,x2:X(v),y2:P.b,stroke:getCss("--line"),"stroke-width":0.6,"stroke-dasharray":"2 4",opacity:0.55}));
+  grid.appendChild(el("line",{x1:P.l,y1:Y(v),x2:P.r,y2:Y(v),stroke:getCss("--line"),"stroke-width":0.6,"stroke-dasharray":"2 4",opacity:0.55}));
+  const tx=el("text",{x:X(v),y:P.b+16,"text-anchor":"middle","class":"tick"});tx.textContent=v;grid.appendChild(tx);
+  if(v>0){const ty=el("text",{x:P.l-10,y:Y(v)+3,"text-anchor":"end","class":"tick"});ty.textContent=v;grid.appendChild(ty);}
+}
+// crux midlines (emphasised)
+grid.appendChild(el("line",{x1:mx,y1:P.t,x2:mx,y2:P.b,stroke:getCss("--rule"),"stroke-width":1.1,"stroke-dasharray":"5 4",opacity:0.55}));
+grid.appendChild(el("line",{x1:P.l,y1:my,x2:P.r,y2:my,stroke:getCss("--rule"),"stroke-width":1.1,"stroke-dasharray":"5 4",opacity:0.55}));
+
+// axis titles + end labels
+function txt(x,y,cls,anchor,s,extra){const t=el("text",{x,y,"class":cls,"text-anchor":anchor});if(extra)for(const k in extra)t.setAttribute(k,extra[k]);t.textContent=s;grid.appendChild(t);return t;}
+txt((P.l+P.r)/2, P.b+40, "axis-title","middle","This time is genuinely different  \u2192");
+txt(P.l, P.b+40, "axis-end","start","\u2190 historical pattern holds");
+txt(P.r, P.b+40, "axis-end","end","structural break \u2192");
+// y title (rotated)
+const yt=el("text",{x:0,y:0,"class":"axis-title","text-anchor":"middle",transform:`translate(${P.l-52},${(P.t+P.b)/2}) rotate(-90)`});
+yt.textContent="Worse for workers  \u2192"; grid.appendChild(yt);
+const ye1=el("text",{x:0,y:0,"class":"axis-end","text-anchor":"start",transform:`translate(${P.l-36},${P.b}) rotate(-90)`});
+ye1.textContent="benign \u2192"; grid.appendChild(ye1);
+const ye2=el("text",{x:0,y:0,"class":"axis-end","text-anchor":"end",transform:`translate(${P.l-36},${P.t}) rotate(-90)`});
+ye2.textContent="\u2190 harmful"; grid.appendChild(ye2);
+
+// quadrant captions
+const caps=document.getElementById("captions");
+function caption(x,y,anchor,title,sub){
+  const t=el("text",{x,y,"class":"qname","text-anchor":anchor});t.textContent=title;caps.appendChild(t);
+  const s=el("text",{x,y:y+15,"class":"qsub","text-anchor":anchor});s.textContent=sub;caps.appendChild(s);
+}
+caption(P.l+14, P.b-14,"start","Continuity","familiar churn, benign");
+caption(P.l+14, P.t+20,"start","Old pattern, new losers","no break \u2014 but workers lose");
+caption(P.r-14, P.b-14,"end","Transformation","rupture with an upside");
+caption(P.r-14, P.t+20,"end","Genuine rupture","a break with a downside");
+
+// ---- capability-timeline rail (sits OUTSIDE the worker-outcome plane) ----
+const RAIL = P.b + 96;          // baseline y for the rail
+// rail caption (left aligned, above the rail)
+const rcap=el("text",{x:P.l,y:RAIL-26,"class":"axis-end","text-anchor":"start"});
+rcap.setAttribute("style","font-weight:600;fill:var(--ink)");
+rcap.textContent="Capability / timeline aggregates \u2014 horizontal position only; no worker-outcome reading";
+grid.appendChild(rcap);
+// rail baseline (same x-scale as the plot, so x-alignment is meaningful)
+grid.appendChild(el("line",{x1:P.l,y1:RAIL,x2:P.r,y2:RAIL,stroke:getCss("--line"),"stroke-width":1}));
+// little end caps
+grid.appendChild(el("line",{x1:P.l,y1:RAIL-4,x2:P.l,y2:RAIL+4,stroke:getCss("--line"),"stroke-width":1}));
+grid.appendChild(el("line",{x1:P.r,y1:RAIL-4,x2:P.r,y2:RAIL+4,stroke:getCss("--line"),"stroke-width":1}));
+
+// ---- render points ----
+const gMarks=document.getElementById("marks");
+const gPts=document.getElementById("points");
+const tip=document.getElementById("tip");
+const figure=document.getElementById("figure");
+const plot=document.getElementById("plot");
+
+let idCounter=0;
+DATA.forEach((d,i)=>{
+  d._id=idCounter++;
+  const color=colorOf(d);
+  if(d.type==="xaxis"){
+    // hollow diamond on the capability-timeline rail (no y-claim)
+    const cx=X(d.x), cy=RAIL, s=7;
+    const g=el("g",{"class":"dot","data-i":i,tabindex:"0"});
+    g.appendChild(el("path",{d:`M ${cx} ${cy-s} L ${cx+s} ${cy} L ${cx} ${cy+s} L ${cx-s} ${cy} Z`,
+      fill:getCss("--paper"),stroke:color,"stroke-width":2.2}));
+    const lab=el("text",{x:cx,y:cy-13,"class":"ptlabel agg","text-anchor":"middle"});
+    lab.textContent=shortName(d);
+    g.appendChild(lab);
+    const val=el("text",{x:cx,y:cy+19,"class":"tick","text-anchor":"middle"});
+    val.textContent="different? \u2248 "+d.x;
+    g.appendChild(val);
+    gMarks.appendChild(g);
+    wire(g,d);
+    return;
+  }
+  const cx=X(d.x), cy=Y(d.y);
+  const g=el("g",{"class":"dot","data-i":i,tabindex:"0",style:`opacity:0`});
+  if(d.type==="aggregate"){
+    // diamond
+    const s=8.5;
+    g.appendChild(el("path",{d:`M ${cx} ${cy-s} L ${cx+s} ${cy} L ${cx} ${cy+s} L ${cx-s} ${cy} Z`,
+      fill:color,stroke:getCss("--paper"),"stroke-width":2}));
+  }else{
+    g.appendChild(el("circle",{cx,cy,r:7,fill:color,stroke:getCss("--paper"),"stroke-width":1.6}));
+  }
+  // label
+  const anchor = d.dx<0?"end":(d.dx>0?"start":"middle");
+  const lab=el("text",{x:cx+d.dx, y:cy+d.dy, "class":"ptlabel"+(d.type==="aggregate"?" agg":""), "text-anchor":anchor});
+  lab.textContent=shortName(d);
+  g.appendChild(lab);
+  gPts.appendChild(g);
+  wire(g,d);
+  // staggered entrance
+  setTimeout(()=>{g.style.transition="opacity .4s ease";g.style.opacity="1";}, 120+i*45);
+});
+
+// ---- tooltip + interaction ----
+let pinned=null, activeHover=null;
+function tipHTML(d){
+  const color=colorOf(d);
+  const stance = (d.camp && d.camp!=="Aggregate")
+    ? ` &middot; <span style="color:var(--ink-soft)">${d.camp.toLowerCase()}</span>` : "";
+  const metrics = (d.type==="xaxis")
+    ? `<div class="metrics">Different? <b>${d.x}</b> <span class="tl">&middot; timeline estimate only</span></div>`
+    : `<div class="metrics"><span>Different? <b>${d.x}</b></span><span>Bad for workers? <b>${d.y}</b></span></div>`;
+  return `<div class="name">${d.name}</div>
+    <div class="camp" style="color:${color}">${profOf(d)}${stance}</div>
+    ${metrics}
+    <div class="basis">${DETAIL[d.name]||d.basis}</div>
+    <a class="src" href="${d.url}" target="_blank" rel="noopener">source &#8599;</a>`;
+}
+function placeTip(clientX,clientY){
+  const fr=figure.getBoundingClientRect();
+  let x=clientX-fr.left+14, y=clientY-fr.top+14;
+  const tw=tip.offsetWidth, th=tip.offsetHeight;
+  if(x+tw>fr.width) x=clientX-fr.left-tw-14;
+  if(y+th>fr.height) y=clientY-fr.top-th-14;
+  if(x<0)x=6; if(y<0)y=6;
+  tip.style.left=x+"px"; tip.style.top=y+"px";
+}
+function showTip(d,evt,clickable){
+  tip.innerHTML=tipHTML(d);
+  tip.classList.toggle("clickable",!!clickable);
+  tip.classList.add("on");
+  placeTip(evt.clientX,evt.clientY);
+}
+function hideTip(){tip.classList.remove("on","clickable");}
+
+function wire(g,d){
+  const isTouch = window.matchMedia("(hover:none)").matches;
+  g.addEventListener("mouseenter",e=>{if(pinned)return;activeHover=g;emphasize(g,true);showTip(d,e,false);});
+  g.addEventListener("mousemove",e=>{if(pinned)return;placeTip(e.clientX,e.clientY);});
+  g.addEventListener("mouseleave",()=>{if(pinned)return;activeHover=null;emphasize(g,false);hideTip();});
+  g.addEventListener("click",e=>{
+    e.stopPropagation();
+    if(isTouch){
+      // tap = pin tooltip (with clickable link); second tap on same opens
+      if(pinned===g){ window.open(d.url,"_blank","noopener"); return; }
+      if(pinned) emphasize(pinned,false);
+      pinned=g; emphasize(g,true); showTip(d,e,true);
+    }else{
+      window.open(d.url,"_blank","noopener");
+    }
+  });
+  g.addEventListener("keydown",e=>{if(e.key==="Enter")window.open(d.url,"_blank","noopener");});
+}
+function emphasize(g,on){
+  g.style.transform = on?"scale(1.18)":"scale(1)";
+  g.style.transformOrigin="center";
+  g.style.transformBox="fill-box";
+  const shape=g.querySelector("circle,path");
+  if(shape) shape.style.filter = on?"drop-shadow(2px 3px 0 rgba(31,27,20,.28))":"none";
+  g.parentNode.appendChild(g); // raise
+}
+// dismiss pinned tooltip when tapping empty space
+document.addEventListener("click",()=>{if(pinned){emphasize(pinned,false);pinned=null;hideTip();}});
+
+// hide the hover tooltip once the cursor strays past this distance (px) from the point's box
+const HIDE_DIST=48;
+document.addEventListener("mousemove",e=>{
+  if(pinned||!activeHover) return;
+  const r=activeHover.getBoundingClientRect();
+  const dx=Math.max(r.left-e.clientX,0,e.clientX-r.right);
+  const dy=Math.max(r.top-e.clientY,0,e.clientY-r.bottom);
+  if(Math.hypot(dx,dy)>HIDE_DIST){ emphasize(activeHover,false); hideTip(); activeHover=null; }
+});
+
+// ---- legend (hover to highlight a profession) ----
+const legend=document.getElementById("legend");
+const groups=[
+  {k:"Economist"},
+  {k:"Computer scientist"},
+  {k:"Entrepreneur",label:"Entrepreneur / lab leader"},
+  {k:"Philosopher"},
+  {k:"Historian"},
+  {k:"Legal scholar"},
+  {k:"Writer / forecaster"},
+];
+groups.forEach(gr=>{
+  const item=document.createElement("span");
+  item.className="legitem";
+  item.innerHTML=`<span class="sw" style="background:${PROF_COLOR[gr.k]}"></span>${gr.label||gr.k}`;
+  item.addEventListener("mouseenter",()=>highlightProf(gr.k,true,item));
+  item.addEventListener("mouseleave",()=>highlightProf(gr.k,false,item));
+  legend.appendChild(item);
+});
+const div=document.createElement("span");div.className="legdivider";legend.appendChild(div);
+const shapeKey=document.createElement("span");
+shapeKey.className="legitem";
+shapeKey.innerHTML=`<span class="sw dia" style="background:${PROF_COLOR['Aggregate']}"></span>forecast aggregate &nbsp;·&nbsp; <span class="sw dia" style="background:var(--paper);box-shadow:inset 0 0 0 2px ${PROF_COLOR['Aggregate']}"></span>timeline aggregate (rail below)`;
+legend.appendChild(shapeKey);
+
+function highlightProf(k,on,item){
+  document.querySelectorAll(".dot").forEach(g=>{
+    const d=DATA[+g.getAttribute("data-i")];
+    g.style.opacity = on ? (profOf(d)===k?"1":"0.18") : "1";
+  });
+  document.querySelectorAll(".legitem").forEach(li=>{if(li!==item)li.classList.toggle("dim",on);});
+}
+</script>
+</body>
+</html>
