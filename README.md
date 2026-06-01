@@ -1,1 +1,3 @@
-# bayesfactor.github.io
+Hosted pages. 
+* TOC
+{:toc}
