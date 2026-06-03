@@ -111,6 +111,36 @@
   .hint{font-size:11.5px;color:var(--ink-soft);font-style:italic;margin:2px 0 0}
   a.inl{color:var(--middle);text-decoration:none;border-bottom:1px solid rgba(63,102,153,.35)}
   a.inl:hover{border-bottom-color:var(--middle)}
+
+  /* ---- responsive / mobile ---- */
+  @media (max-width: 700px) {
+    .wrap { padding: 20px 14px 40px; }
+    .kicker { font-size: 10px; letter-spacing: 0.2em; }
+    .dek { font-size: 14px; }
+    .hint { font-size: 12px; }
+    .legend { font-size: 11.5px; gap: 6px 12px; }
+    .notes { font-size: 12px; }
+    .notes p { max-width: 100%; }
+    .notes .foot { flex-direction: column; gap: 4px; font-size: 10.5px; }
+    /* SVG text — bump sizes since they render in CSS px (not SVG user units)
+       so they do not automatically scale up when viewport is narrow */
+    .qname  { font-size: 16px; }
+    .qsub   { font-size: 12.5px; }
+    .axis-title { font-size: 17px; }
+    .axis-end   { font-size: 12.5px; }
+    .tick   { font-size: 12px; }
+    .ptlabel{ font-size: 13px; }
+    /* chart scrolls horizontally so geometry renders at a usable size */
+    .figure { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    #plot   { min-width: 800px; }
+    /* tooltip */
+    .tip { max-width: min(280px, 88vw); }
+    .tip .name { font-size: 15px; }
+    .tip .basis { font-size: 11.5px; }
+    /* scroll hint visibility */
+    .scroll-note { display: inline; }
+  }
+  .scroll-note { display: none; }
 </style>
 </head>
 <body>
@@ -120,7 +150,7 @@
     <h1>Is This Time <em>Different?</em></h1>
     <p class="dek">Will AI and Robotics be yet another technology wave like past waves of automation where people shift jobs but the economic unemployment remains low, or is this time different? What do serious thinkers and forecasting aggregates say on this topic? <b>Horizontal:</b> will AI/robotics break the historical "displace &rarr; reabsorb" job pattern across the economy? <b>Vertical:</b> will the outcome be bad for typical workers?</p>
   </header>
-  <p class="hint">Hover a point for its reasoning and source &mdash; or tap on touchscreens. Click a point to open details.</p>
+  <p class="hint">Hover a point for its reasoning and source &mdash; or tap on touchscreens. Click a point to open details.<span class="scroll-note"> &mdash; swipe the chart sideways to see the full view.</span></p>
 
   <div class="figure" id="figure">
     <svg id="plot" viewBox="0 0 1000 808" role="img" aria-label="2x2 scatter of thinkers on whether AI is different and whether it is bad for workers">
